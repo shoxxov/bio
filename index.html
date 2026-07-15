@@ -1283,8 +1283,8 @@ const SOCIAL_ACCOUNTS = [
         platform: "Telegram",
         url: "https://t.me/shoxxov",
         username: "@shoxxov",
-        avatarUrl: TELEGRAM_AVATAR,
-        useTelegramAvatar: false
+        avatarUrl: TELEGRAM_AVATAR,  // fallback, если не загрузится
+        useTelegramAvatar: true
     },
     {
         platform: "Discord",
