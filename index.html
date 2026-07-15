@@ -274,7 +274,7 @@
         }
 
         .profile-age {
-            display: none; /* скрыт */
+            display: none;
         }
 
         .support-title {
@@ -1129,7 +1129,7 @@
 <div class="server-preview" id="discord-server-preview">
 <div class="server-scroll-item">
 <a aria-label="Open Telegram profile" class="server-avatar" href="https://t.me/shoxxov" id="discord-server-link" rel="noopener noreferrer" target="_blank">
-<img alt="" class="account-avatar" id="account-avatar" src="https://cdn.discordapp.com/attachments/1523127261757444126/1526935349790769262/image.png?ex=6a58d4dc&is=6a57835c&hm=4e6984cd02a11648066692b62529f8162bf30ad6560c99ecc0d7c5c48b809020&"/>
+<img alt="" class="account-avatar" id="account-avatar" src=""/>
 </a>
 <div class="server-name" id="discord-server-name">Telegram</div>
 <div class="server-members" id="discord-member-count">@shoxxov</div>
@@ -1284,7 +1284,7 @@ const SOCIAL_ACCOUNTS = [
         url: "https://t.me/shoxxov",
         username: "@shoxxov",
         avatarUrl: TELEGRAM_AVATAR,
-        useTelegramAvatar: true
+        useTelegramAvatar: false
     },
     {
         platform: "Discord",
@@ -1294,51 +1294,7 @@ const SOCIAL_ACCOUNTS = [
         useDiscordAvatar: false
     }
 ];
-
-async function fetchTelegramAvatar() {
-    try {
-        const telegramUrl = `https://t.me/${TELEGRAM_USERNAME}`;
-        const response = await fetch(`${WORKER_URL}?url=${encodeURIComponent(telegramUrl)}`, {
-            cache: 'no-store'
-        });
-        const html = await response.text();
-        
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const photoImg = doc.querySelector('.tgme_page_photo_image');
-        
-        if (photoImg && photoImg.src) {
-            const avatarUrl = photoImg.src + '?t=' + Date.now();
-            currentAccounts = currentAccounts.map(account => {
-                if (account.useTelegramAvatar) {
-                    return {
-                        ...account,
-                        avatarUrl: avatarUrl
-                    };
-                }
-                return account;
-            });
-            if (currentServerIndex === 0) {
-                applySocialAccount(currentAccounts[0]);
-            }
-        }
-    } catch (error) {
-        console.log('Telegram avatar load error');
-    }
-}
-
-async function initializeSocialAccounts() {
-    await Promise.all([
-        fetchTelegramAvatar()
-    ]);
-    
-    showSocialAccount(currentServerIndex, false);
-    
-    setTimeout(() => {
-        showSocialAccount(currentServerIndex, false);
-    }, 100);
-}
-asciiElement = document.getElementById("ascii-art");
+const asciiElement = document.getElementById("ascii-art");
 const liquidGlass = document.querySelector(".liquid-glass");
 const discordServerPreview = document.getElementById("discord-server-preview");
 const discordServerLink = document.getElementById("discord-server-link");
@@ -2162,8 +2118,9 @@ function startDiscordPresencePolling() {
 function applySocialAccount(account) {
     supportTitle.textContent = "find me on";
     discordServerName.textContent = account.platform;
-    discordMemberCount.textContent = account.username; 
+    discordServerMemberCount.textContent = account.username;
     
+    // Принудительно ставим свою аватарку
     if (accountAvatar) {
         accountAvatar.src = account.avatarUrl;
         accountAvatar.onerror = () => {
@@ -2174,6 +2131,7 @@ function applySocialAccount(account) {
     discordServerLink.href = account.url;
     discordServerLink.setAttribute("aria-label", `Open ${account.platform} profile`);
 }
+
 function showSocialAccount(index, animate = true) {
     const nextIndex = (index + currentAccounts.length) % currentAccounts.length;
     const nextAccount = currentAccounts[nextIndex];
@@ -2343,14 +2301,13 @@ initParticles();
 createCursorTrail();
 updateCursorTrail();
 initParallax();
-    </script>
-<script crossorigin="anonymous" data-cf-beacon='{"version":"2024.11.0","token":"4afbe4ffcc424211a1ed4b8d7fa3729b","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' defer="" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447"></script>
-</body></html>
 
-// ПРИНУДИТЕЛЬНО ЗАПУСКАЕМ КАРУСЕЛЬ ЧЕРЕЗ 1 СЕКУНДУ
+// ===== ЗАПУСКАЕМ КАРУСЕЛЬ =====
 setTimeout(() => {
     if (!serverCarouselStarted) {
         serverCarouselStarted = true;
         scheduleNextSocialAccount();
     }
 }, 1000);
+    </script>
+</body></html>
